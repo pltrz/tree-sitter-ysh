@@ -5162,23 +5162,43 @@
       "value": "[1-9][0-9]?"
     },
     "number": {
-      "type": "CHOICE",
+      "type": "SEQ",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "_decimal"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "TOKEN",
+              "content": {
+                "type": "STRING",
+                "value": "-"
+              }
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         },
         {
-          "type": "PATTERN",
-          "value": "0x[a-fA-F0-9]+(?:(?:_[a-fA-F0-9]+)*)?"
-        },
-        {
-          "type": "PATTERN",
-          "value": "0o[0-7]+(?:(?:_[0-7]+)*)?"
-        },
-        {
-          "type": "PATTERN",
-          "value": "0b[01]+(?:(?:_[01]+)*)?"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_decimal"
+            },
+            {
+              "type": "PATTERN",
+              "value": "0x[a-fA-F0-9]+(?:(?:_[a-fA-F0-9]+)*)?"
+            },
+            {
+              "type": "PATTERN",
+              "value": "0o[0-7]+(?:(?:_[0-7]+)*)?"
+            },
+            {
+              "type": "PATTERN",
+              "value": "0b[01]+(?:(?:_[01]+)*)?"
+            }
+          ]
         }
       ]
     },

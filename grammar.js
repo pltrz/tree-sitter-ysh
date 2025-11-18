@@ -669,14 +669,17 @@ module.exports = grammar({
     command_name: ($) => choice($.word, $.expansion, $.string),
     positional_argument: (_) => /[1-9][0-9]?/,
     number: ($) =>
-      choice(
-        $._decimal,
-        // Hex
-        /0x[a-fA-F0-9]+(?:(?:_[a-fA-F0-9]+)*)?/,
-        // Oct
-        /0o[0-7]+(?:(?:_[0-7]+)*)?/,
-        // Binary
-        /0b[01]+(?:(?:_[01]+)*)?/,
+      seq(
+        optional(token("-")),
+        choice(
+          $._decimal,
+          // Hex
+          /0x[a-fA-F0-9]+(?:(?:_[a-fA-F0-9]+)*)?/,
+          // Oct
+          /0o[0-7]+(?:(?:_[0-7]+)*)?/,
+          // Binary
+          /0b[01]+(?:(?:_[01]+)*)?/,
+        ),
       ),
     _decimal: (_) => /\d+(_\d+)*(\.\d+)?(_\d+)*/,
     escaped_bytes: (_) => /\\y[a-fA-F0-9]{2}/,
