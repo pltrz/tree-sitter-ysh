@@ -51,20 +51,20 @@ bool tree_sitter_ysh_external_scanner_scan(void *payload, TSLexer *lexer,
   }
 
   // Skip whitespaces
-  while (lexer->lookahead == ' ') {
+  while (lexer->lookahead == ' ' || lexer->lookahead == '\t') {
     lexer->advance(lexer, true);
   }
 
-  while ((valid_symbols[CLOSE_PAREN] || valid_symbols[CLOSE_BRACE] ||
-          valid_symbols[CLOSE_BRACKET] || valid_symbols[COMMA] ||
-          valid_symbols[SEMICOLON] || valid_symbols[CLOSING_LIST] ||
-          valid_symbols[NAMED_PARAM_EQ] || valid_symbols[STATEMENT_SENTINEL] ||
-          valid_symbols[MULTILINE_CMD_SENTINEL] ||
-          valid_symbols[COMMA_SENTINEL]) &&
-         !valid_symbols[TERMINATOR_SENTINEL] && lexer->lookahead == '\n') {
+  if ((valid_symbols[CLOSE_PAREN] || valid_symbols[CLOSE_BRACE] ||
+       valid_symbols[CLOSE_BRACKET] || valid_symbols[COMMA] ||
+       valid_symbols[SEMICOLON] || valid_symbols[CLOSING_LIST] ||
+       valid_symbols[NAMED_PARAM_EQ] || valid_symbols[STATEMENT_SENTINEL] ||
+       valid_symbols[MULTILINE_CMD_SENTINEL] ||
+       valid_symbols[COMMA_SENTINEL]) &&
+      !valid_symbols[TERMINATOR_SENTINEL] && lexer->lookahead == '\n') {
     lexer->advance(lexer, false);
     if (valid_symbols[MULTILINE_CMD_SENTINEL]) {
-      while (lexer->lookahead == ' ') {
+      while (lexer->lookahead == ' ' || lexer->lookahead == '\t') {
         lexer->advance(lexer, true);
       }
       // Two consecutive newlines are not allowed in multiline commands
@@ -114,8 +114,11 @@ bool tree_sitter_ysh_external_scanner_scan(void *payload, TSLexer *lexer,
 
   if (valid_symbols[NAMED_PARAM_EQ] && lexer->lookahead == '=') {
     lexer->advance(lexer, false);
-    lexer->result_symbol = NAMED_PARAM_EQ;
-    return true;
+    if (lexer->lookahead != '=') {
+      lexer->result_symbol = NAMED_PARAM_EQ;
+      return true;
+    }
+    return false;
   }
 
   if (valid_symbols[DOLLAR_EXPANSION] && lexer->lookahead == '$') {
@@ -127,9 +130,11 @@ bool tree_sitter_ysh_external_scanner_scan(void *payload, TSLexer *lexer,
       return true;
     }
     // $1, $*, $?, $#
-    if (is_num_(lexer->lookahead) || lexer->lookahead == '*' ||
-        lexer->lookahead == '?' || lexer->lookahead == '#' ||
-        lexer->lookahead == '@') {
+    if (is_num_(lexer->lookahead)) {
+      lexer->result_symbol = DOLLAR_EXPANSION;
+      return true;
+    } else if (lexer->lookahead == '*' || lexer->lookahead == '?' ||
+               lexer->lookahead == '#' || lexer->lookahead == '@') {
       lexer->advance(lexer, false);
       if (!is_alnum_(lexer->lookahead)) {
         lexer->result_symbol = DOLLAR_EXPANSION;
@@ -166,7 +171,7 @@ bool tree_sitter_ysh_external_scanner_scan(void *payload, TSLexer *lexer,
 
   if (valid_symbols[ENV_EQUAL] && lexer->lookahead == '=') {
     lexer->advance(lexer, false);
-    if (lexer->lookahead != ' ') {
+    if (lexer->lookahead != ' ' && lexer->lookahead != '\t') {
       lexer->result_symbol = ENV_EQUAL;
       return true;
     }
@@ -184,14 +189,15 @@ bool tree_sitter_ysh_external_scanner_scan(void *payload, TSLexer *lexer,
       if (valid_symbols[ENV_VAR_NAME] && lexer->lookahead == '=') {
         lexer->result_symbol = ENV_VAR_NAME;
         return true;
-      } else if (valid_symbols[CONST_DECL_VAR] && lexer->lookahead == ' ') {
+      } else if (valid_symbols[CONST_DECL_VAR] &&
+                 (lexer->lookahead == ' ' || lexer->lookahead == '\t')) {
         lexer->mark_end(lexer);
-        while (lexer->lookahead == ' ') {
+        while (lexer->lookahead == ' ' || lexer->lookahead == '\t') {
           lexer->advance(lexer, false);
         }
         if (lexer->lookahead == '=') {
           lexer->advance(lexer, false);
-          if (lexer->lookahead == ' ') {
+          if (lexer->lookahead == ' ' || lexer->lookahead == '\t') {
             lexer->result_symbol = CONST_DECL_VAR;
             return true;
           }

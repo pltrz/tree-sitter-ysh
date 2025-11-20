@@ -57,15 +57,17 @@ Multiline commands
     (word)
     (word)
     (comment)
-    (command_name
+    (command_call
+      (command_name
+        (word))
       (word))
-    (word)
     (comment)
     (comment)
-    (command_name
-      (word))
-    (word)
-    (number)
+    (command_call
+      (command_name
+        (word))
+      (word)
+      (number))
     (comment))
   (multiline_command_call
     (command_name
@@ -292,8 +294,7 @@ json write (space=0, { status: 302, headers: { location: '/', }, },)
     (word)
     (parameter_list_call
       (named_parameter
-        (function_parameter
-          (variable_name))
+        (variable_name)
         (number))
       (dict
         (variable_name)
@@ -319,8 +320,7 @@ json write (space=0, {
     (word)
     (parameter_list_call
       (named_parameter
-        (function_parameter
-          (variable_name))
+        (variable_name)
         (number))
       (dict
         (variable_name)
@@ -362,10 +362,8 @@ Service foo {
   (proc_definition
     (proc_name)
     (proc_parameter_list
-      (function_parameter
-        (variable_name))
-      (function_parameter
-        (variable_name)))
+      (variable_name)
+      (variable_name))
     (proc_block
       (expression_mode
         (variable_name)
@@ -496,3 +494,53 @@ diff <(write $one) <(write $two)
           (word))
         (expansion
           (variable_name))))))
+================
+- as command arg
+================
+echo -
+---
+(program
+  (command_call
+    (command_name
+      (word))
+    (word)))
+=========================
+Proc in multiline command
+=========================
+... json write ({
+      pred,
+      condition,
+      block: block.sourceCode().code_str
+    }) | tr -d u'\n' >> $[ENV.CALLBACKFD] &
+---
+(program
+  (multiline_command_call
+    (command_name
+      (word))
+    (word)
+    (parameter_list_call
+      (dict
+        (variable_name)
+        (variable_name)
+        (variable_name)
+        (variable_name)
+        (method_call
+          (function_name
+            (variable_name)))
+        (variable_name)))
+    (command_call
+      (command_name
+        (word))
+      (word)
+      (string
+        (escape_sequence))
+      (redirection
+        (expansion
+          (variable_name)
+          (variable_name))))))
+==================
+Invalid terminator
+:error
+==================
+echo lol | var x &
+---

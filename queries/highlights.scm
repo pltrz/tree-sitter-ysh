@@ -27,6 +27,9 @@
 
 ((command_name) @function.builtin
   (#any-of? @function.builtin "echo" "type" "shopt" "json" "write" "assert" "fork" "forkwait"))
+[
+  "shvar"
+] @function.builtin
 ((command_name) @keyword.import
   (#eq? @keyword.import "use"))
 ((command_name) "=" @keyword.debug)
@@ -35,6 +38,7 @@
 [
   "func"
   "proc"
+  "typed"
 ] @keyword.function
 
 "return" @keyword.return
@@ -68,7 +72,6 @@
   "-="
   "*="
   "/="
-  "=="
   "==="
   "~=="
   "!=="
@@ -104,9 +107,6 @@ constant: (variable_name) @constant
              (#set! priority 20))
 (variable_assignment key: (variable_name) @property)
 
-(command_call (word) @variable.parameter)
-(multiline_command_call argument: (word) @variable.parameter)
-
 ; (dollar_token) @punctuation.special
 
 member: (variable_name) @variable.member
@@ -116,13 +116,15 @@ key: (variable_name) @variable.member
 ((variable_name) @variable.builtin
                  (#eq? @variable.builtin "_error"))
 
-(function_definition (function_name) @function.method)
-(proc_definition (proc_name) @function.method)
-(function_call call: (function_name) @function.call
+(function_definition (function_name) @function)
+(proc_definition (proc_name) @function)
+(function_call (function_name) @function.call
              (#set! priority 90))
 (method_call method: (function_name) @function.method.call)
-(function_parameter) @variable.parameter
+parameter: (variable_name) @variable.parameter
 (rest_of_arguments) @variable.parameter
+(parameter_list (named_parameter (variable_name) @variable.parameter))
+(proc_parameter_list (named_parameter (variable_name) @variable.parameter))
 
 [
   (escape_sequence)
@@ -158,5 +160,3 @@ key: (variable_name) @variable.member
 ] @punctuation.special
 
 redirection_value: (word) @variable.parameter
-
-(ERROR) @error

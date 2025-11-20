@@ -29,10 +29,8 @@ func foo(bar, foobar) {
     (function_name
       (variable_name))
     (parameter_list
-      (function_parameter
-        (variable_name))
-      (function_parameter
-        (variable_name)))
+      (variable_name)
+      (variable_name))
     (func_block
       (variable_declaration
         (variable_name)
@@ -49,19 +47,15 @@ func f(p1, p2, ...rest_pos; n1=42, n2='foo', ...rest_named) {
     (function_name
       (variable_name))
     (parameter_list
-      (function_parameter
-        (variable_name))
-      (function_parameter
-        (variable_name))
+      (variable_name)
+      (variable_name)
       (rest_of_arguments
         (variable_name))
       (named_parameter
-        (function_parameter
-          (variable_name))
+        (variable_name)
         (number))
       (named_parameter
-        (function_parameter
-          (variable_name))
+        (variable_name)
         (string))
       (rest_of_arguments
             (variable_name)))
@@ -99,8 +93,7 @@ call myRepeat('z', 3, special=true)
       (string)
       (number)
       (named_parameter
-        (function_parameter
-          (variable_name))
+        (variable_name)
         (boolean)))))
 ======================
 Proc definitions
@@ -196,3 +189,61 @@ proc serve {
         (string)
         (string)
         (string)))))
+============================
+Named parameter in func call
+============================
+call io->evalToDict(block, vars=b)
+---
+(program
+  (expression_mode
+    (variable_name)
+    (method_call
+      (function_name
+        (variable_name))
+      (variable_name)
+      (named_parameter
+        (variable_name)
+        (variable_name)))))
+=========================
+Proc with trailing commas
+=========================
+proc myproc (word1, word2,; pos = "lol", ...catch,;; block=null ) {
+    echo $word1
+}
+---
+(program
+  (proc_definition
+    (proc_name)
+    (proc_parameter_list
+      (variable_name)
+      (variable_name)
+      (named_parameter
+        (variable_name)
+        (string))
+      (rest_of_arguments
+        (variable_name))
+      (named_parameter
+        (variable_name)
+        (null)))
+    (proc_block
+      (command_call
+        (command_name
+          (word))
+        (expansion
+          (variable_name))))))
+=======================================
+Proc with two commas next to each other
+:error
+=======================================
+proc myproc (word2,,) {
+    echo $word1
+}
+---
+==================
+Proc with no comma
+:error
+==================
+proc myproc (word2 ...catch) {
+    echo $word1
+}
+---

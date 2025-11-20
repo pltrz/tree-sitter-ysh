@@ -418,3 +418,16 @@ Struct mystruct {
       (const_declaration
         (variable_name)
         (string)))))
+========
+Equality
+========
+assert [MAX_PROC === -1]
+---
+(program
+  (command_call
+    (command_name
+      (word))
+    (parameter_list_call
+      (binary_expression
+        (variable_name)
+        (number)))))
